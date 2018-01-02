@@ -35,6 +35,7 @@ import java.util.List;
  * <p>
  * 3.DefaultMQProducerImpl.tryToFindTopicPublishInfo(),即向Namesrv发出GET_ROUTEINTO_BY_TOPIC的请求,来更新
  * MQProducerInner的topicPublishInfoTable和MQConsumerInner的topicSubscribeInfoTable
+ * (MQClientAPIImpl.getTopicRouteInfoFromNameServer)
  * <p>
  * 4.调用topicPublishInfo.selectOneMessageQueue(),从发布的topic中轮询取出一个MessageQueue默认一个topic对应4个MessageQueue
  * <p>

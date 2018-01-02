@@ -133,8 +133,6 @@ public class MessageClientIDSetter {
     }
     
     public static void setUniqID(final Message msg) {
-
-
         if (msg.getProperty(MessageConst.PROPERTY_UNIQ_CLIENT_MESSAGE_ID_KEYIDX) == null) {
             msg.putProperty(MessageConst.PROPERTY_UNIQ_CLIENT_MESSAGE_ID_KEYIDX, createUniqID());            
         }

@@ -268,29 +268,25 @@ public abstract class NettyRemotingAbstract {
             throws InterruptedException, RemotingSendRequestException, RemotingTimeoutException {
         //相当于request ID, RemotingCommand会为每一个request产生一个request ID, 从0开始, 每次加1
         final int opaque = request.getOpaque();
-
         try {
             //根据request ID构建ResponseFuture
             final ResponseFuture responseFuture = new ResponseFuture(opaque, timeoutMillis, null, null);
             this.responseTable.put(opaque, responseFuture);
             final SocketAddress addr = channel.remoteAddress();
             //刷出数据
-            channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
-                //消息发送后执行
-                @Override
-                public void operationComplete(ChannelFuture f) throws Exception {
-                    if (f.isSuccess()) {
-                        responseFuture.setSendRequestOK(true);
-                        return;
-                    } else {
-                        responseFuture.setSendRequestOK(false);
-                    }
-
-                    responseTable.remove(opaque);
-                    responseFuture.setCause(f.cause());
-                    responseFuture.putResponse(null);
-                    plog.warn("send a request command to channel <" + addr + "> failed.");
+            //消息发送后执行
+            channel.writeAndFlush(request).addListener((ChannelFutureListener) f -> {
+                if (f.isSuccess()) {
+                    responseFuture.setSendRequestOK(true);
+                    return;
+                } else {
+                    responseFuture.setSendRequestOK(false);
                 }
+
+                responseTable.remove(opaque);
+                responseFuture.setCause(f.cause());
+                responseFuture.putResponse(null);
+                plog.warn("send a request command to channel <" + addr + "> failed.");
             });
             //等待服务器端响应结果
             RemotingCommand responseCommand = responseFuture.waitResponse(timeoutMillis);

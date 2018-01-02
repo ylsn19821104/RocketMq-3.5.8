@@ -29,20 +29,32 @@ import com.alibaba.rocketmq.remoting.common.RemotingUtil;
  */
 public class ClientConfig {
     public static final String SendMessageWithVIPChannelProperty = "com.rocketmq.sendMessageWithVIPChannel";
+    /**
+     * Name Server地址列表,多个NameServer地址用分号隔开
+     */
     private String namesrvAddr = System.getProperty(MixAll.NAMESRV_ADDR_PROPERTY, System.getenv(MixAll.NAMESRV_ADDR_ENV));
+    /**
+     * 本机IP
+     */
     private String clientIP = RemotingUtil.getLocalAddress();
     private String instanceName = System.getProperty("rocketmq.client.name", "DEFAULT");
+    /**
+     * 通信层异步回调线程数
+     */
     private int clientCallbackExecutorThreads = Runtime.getRuntime().availableProcessors();
     /**
      * Pulling topic information interval from the named server
+     * 轮询NameServer间隔时间
      */
     private int pollNameServerInteval = 1000 * 30;
     /**
      * Heartbeat interval in microseconds with message broker
+     * 向Broker发送心跳间隔时间
      */
     private int heartbeatBrokerInterval = 1000 * 30;
     /**
      * Offset persistent interval for consumer
+     * 持久化Consumer消费进度间隔时间
      */
     private int persistConsumerOffsetInterval = 1000 * 5;
     private boolean unitMode = false;

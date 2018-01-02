@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,8 +29,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author shijia.wxr
  */
 public class LatencyFaultToleranceImpl implements LatencyFaultTolerance<String> {
+    /**
+     * 对象故障信息Table
+     */
     private final ConcurrentHashMap<String, FaultItem> faultItemTable = new ConcurrentHashMap<String, FaultItem>(16);
-
+    /**
+     * 对象选择Index
+     *
+     * @see #pickOneAtLeast()
+     */
     private final ThreadLocalIndex whichItemWorst = new ThreadLocalIndex(0);
 
     @Override
@@ -66,6 +73,9 @@ public class LatencyFaultToleranceImpl implements LatencyFaultTolerance<String> 
         this.faultItemTable.remove(name);
     }
 
+    /**
+     * 选择一个相对优秀的对象
+     */
     @Override
     public String pickOneAtLeast() {
         final Enumeration<FaultItem> elements = this.faultItemTable.elements();
@@ -76,10 +86,10 @@ public class LatencyFaultToleranceImpl implements LatencyFaultTolerance<String> 
         }
 
         if (!tmpList.isEmpty()) {
+            // 打乱 + 排序。TODO 疑问：应该只能二选一。猜测Collections.shuffle(tmpList)去掉。
             Collections.shuffle(tmpList);
-
             Collections.sort(tmpList);
-
+            // 选择顺序在前一半的对象
             final int half = tmpList.size() / 2;
             if (half <= 0) {
                 return tmpList.get(0).getName();
@@ -94,13 +104,26 @@ public class LatencyFaultToleranceImpl implements LatencyFaultTolerance<String> 
 
     class FaultItem implements Comparable<FaultItem> {
         private final String name;
+        /**
+         * 延迟
+         */
         private volatile long currentLatency;
+        /**
+         * 开始可用时间
+         */
         private volatile long startTimestamp;
 
         public FaultItem(final String name) {
             this.name = name;
         }
 
+        /**
+         * 比较对象
+         * 可用性 > 延迟 > 开始可用时间
+         *
+         * @param other other
+         * @return 升序
+         */
         @Override
         public int compareTo(final FaultItem other) {
             if (this.isAvailable() != other.isAvailable()) {
